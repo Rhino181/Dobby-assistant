@@ -45,4 +45,21 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorDetails = await response.text();
       console.error("Fireworks API error response:", errorDetails);
-      return res.status(response.status).json({ error: "Failed to get a response from the AI
+      return res.status(response.status).json({ error: "Failed to get a response from the AI model", details: errorDetails });
+    }
+
+    const data = await response.json();
+
+    // 6. Extract the text from the response object
+    // The response structure from Fireworks is data -> choices -> [0] -> message -> content
+    const output = data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
+
+    // 7. Send the successful response back to the client
+    return res.status(200).json({ reply: output });
+
+  } catch (error) {
+    // Handle unexpected server-side errors
+    console.error("An unexpected error occurred in the research handler:", error);
+    return res.status(500).json({ error: "An internal server error occurred" });
+  }
+}
