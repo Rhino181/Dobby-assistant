@@ -31,7 +31,7 @@ export const handler = async (event, context) => {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-8b",
+        model: "model: "accounts/fireworks/models/llama-v3-8b-instruct",",
         messages: [{ role: "user", content: query }],
         max_tokens: 1500,
         temperature: 0.7,
