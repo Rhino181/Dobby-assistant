@@ -29,7 +29,7 @@ export const handler = async (event, context) => {
       },
       body: JSON.stringify({
         // ✅ Use the standard test model to check if your API key works
-        model: "model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-8b",",
+        model: "accounts/fireworks/models/llama-v3-8b-instruct",
         messages: [{ role: "user", content: query }],
       }),
     });
