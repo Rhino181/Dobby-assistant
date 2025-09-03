@@ -1,52 +1,54 @@
-export default async function handler(req, res) {
-  console.log("Generate report handler invoked", req.method, req.body);
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST requests allowed" });
-  }
-
+export const handler = async (event, context) => {
   try {
-    const { topic } = req.body;
+    const body = JSON.parse(event.body);
+    const { message } = body; // Changed from 'query' to 'message'
 
-    if (!topic) {
-      return res.status(400).json({ error: "Missing topic in request body" });
+    if (!message) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Missing 'message' in request body" }),
+      };
     }
 
-    if (!process.env.SENTIENT_API_KEY) {
-      console.error("SENTIENT_API_KEY is missing");
-      return res.status(500).json({ error: "Server misconfigured" });
+    const apiKey = process.env.SENTIENT_API_KEY;
+    if (!apiKey) {
+      console.error("Fireworks AI API key is missing!");
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "Server is misconfigured: API key not found" }),
+      };
     }
 
-    const response = await fetch("https://api.sentient.foundation/v1/responses", {
+    const response = await fetch("https://api.fireworks.ai/inference/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": Bearer ${process.env.SENTIENT_API_KEY},
-      },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b",
-        input: [{ role: "user", content: Generate a detailed report about: ${topic} }],
+        model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-8b",
+        messages: [{ role: "user", content: message }],
       }),
     });
 
     if (!response.ok) {
-      const errText = await response.text();
-      console.error("Sentient API error:", errText);
-      return res.status(response.status).json({ error: errText });
+      const errorDetails = await response.text();
+      return {
+        statusCode: response.status,
+        body: JSON.stringify({ error: "Failed to get a response from the AI model", details: errorDetails }),
+      };
     }
 
     const data = await response.json();
+    const output = data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
 
-    let output = "No response received";
-    if (data.output?.[0]?.content) {
-      const first = data.output[0].content.find(c => c.text);
-      if (first) output = first.text;
-    }
-
-    return res.status(200).json({ report: output });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ reply: output }),
+    };
 
   } catch (error) {
-    console.error("Error in /api/generate-report:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error in dobby handler:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "An internal server error occurred" }),
+    };
   }
-}
+};
