@@ -1,7 +1,7 @@
 export const handler = async (event, context) => {
   try {
     const body = JSON.parse(event.body);
-    const { message } = body; // Changed from 'query' to 'message'
+    const { message } = body;
 
     if (!message) {
       return {
@@ -12,7 +12,6 @@ export const handler = async (event, context) => {
 
     const apiKey = process.env.SENTIENT_API_KEY;
     if (!apiKey) {
-      console.error("Fireworks AI API key is missing!");
       return {
         statusCode: 500,
         body: JSON.stringify({ error: "Server is misconfigured: API key not found" }),
@@ -23,7 +22,7 @@ export const handler = async (event, context) => {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-8b",
+        model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-70b-new",
         messages: [{ role: "user", content: message }],
       }),
     });
@@ -45,7 +44,6 @@ export const handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error("Error in dobby handler:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "An internal server error occurred" }),
