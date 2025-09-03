@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         // Use the custom Sentient model hosted on Fireworks
-        model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-8b", 
+        model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-8b",
         // Structure the request according to Fireworks' API specification
         messages: [
           {
@@ -45,6 +45,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errorDetails = await response.text();
       console.error("Fireworks API error response:", errorDetails);
+      // The single, correct error response line:
       return res.status(response.status).json({ error: "Failed to get a response from the AI model", details: errorDetails });
     }
 
