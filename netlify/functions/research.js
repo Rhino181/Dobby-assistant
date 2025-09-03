@@ -1,7 +1,5 @@
-// ✅ Use the correct 'export const handler' syntax for Netlify
 export const handler = async (event, context) => {
   try {
-    // The request body from the frontend is a string that needs to be parsed
     const body = JSON.parse(event.body);
     const { query } = body;
 
@@ -14,7 +12,6 @@ export const handler = async (event, context) => {
 
     const apiKey = process.env.SENTIENT_API_KEY;
     if (!apiKey) {
-      console.error("Fireworks AI API key is missing!");
       return {
         statusCode: 500,
         body: JSON.stringify({ error: "Server is misconfigured: API key not found" }),
@@ -23,20 +20,15 @@ export const handler = async (event, context) => {
 
     const response = await fetch("https://api.fireworks.ai/inference/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
       body: JSON.stringify({
-        // ✅ Use the standard test model to check if your API key works
-        model: "model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-70b-new",",
+        model: "accounts/sentientfoundation/models/dobby-unhinged-llama-3-3-70b-new",
         messages: [{ role: "user", content: query }],
       }),
     });
 
     if (!response.ok) {
       const errorDetails = await response.text();
-      console.error("Fireworks API error response:", errorDetails);
       return {
         statusCode: response.status,
         body: JSON.stringify({ error: "Failed to get a response from the AI model", details: errorDetails }),
@@ -46,14 +38,12 @@ export const handler = async (event, context) => {
     const data = await response.json();
     const output = data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
 
-    // ✅ The return value must be a specific object for Netlify
     return {
       statusCode: 200,
       body: JSON.stringify({ reply: output }),
     };
 
   } catch (error) {
-    console.error("An unexpected error occurred in the handler:", error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "An internal server error occurred" }),
