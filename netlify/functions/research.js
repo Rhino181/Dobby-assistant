@@ -1,10 +1,7 @@
-// Use 'export const handler' instead of 'export default' or 'module.exports'
+// ✅ Use the correct 'export const handler' syntax for Netlify
 export const handler = async (event, context) => {
-  // 1. Netlify functions only run on the method they receive.
-  //    A POST request from your frontend will trigger this.
-  
   try {
-    // 2. The request body is a string that needs to be parsed
+    // The request body from the frontend is a string that needs to be parsed
     const body = JSON.parse(event.body);
     const { query } = body;
 
@@ -31,10 +28,9 @@ export const handler = async (event, context) => {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "model: "accounts/fireworks/models/llama-v3-8b-instruct",",
+        // ✅ Use the standard test model to check if your API key works
+        model: "accounts/fireworks/models/llama-v3-8b-instruct",
         messages: [{ role: "user", content: query }],
-        max_tokens: 1500,
-        temperature: 0.7,
       }),
     });
 
@@ -50,7 +46,7 @@ export const handler = async (event, context) => {
     const data = await response.json();
     const output = data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
 
-    // 3. The return value must be an object with statusCode and a stringified body
+    // ✅ The return value must be a specific object for Netlify
     return {
       statusCode: 200,
       body: JSON.stringify({ reply: output }),
