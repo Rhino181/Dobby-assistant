@@ -4,78 +4,96 @@
   <meta charset="UTF-8" />
   <title>Dobby Assistant</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9; color: #333; }
-    h1 { color: #5a4fcf; }
-    #chat { border: 1px solid #ddd; border-radius: 5px; padding: 10px; height: 400px; overflow-y: auto; margin-bottom: 10px; background-color: #fff; }
-    .user { color: #0056b3; text-align: right; margin: 8px 0; }
-    .bot { color: #28a745; text-align: left; margin: 8px 0; }
-    .error { color: #dc3545; font-style: italic; }
-    #input-container { display: flex; }
-    #query { flex-grow: 1; border: 1px solid #ccc; border-radius: 5px; padding: 10px; }
-    button { padding: 10px 15px; border: none; background-color: #5a4fcf; color: white; border-radius: 5px; margin-left: 10px; cursor: pointer; }
-    button:disabled { background-color: #aaa; cursor: not-allowed; }
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    #chat { border: 1px solid #ddd; padding: 10px; height: 400px; overflow-y: auto; margin-bottom: 10px; }
+    .user { color: blue; margin: 5px 0; }
+    .bot { color: green; margin: 5px 0; }
+    .error { color: red; margin: 5px 0; }
   </style>
 </head>
 <body>
   <h1>⚡ Dobby AI Assistant</h1>
   <div id="chat"></div>
-  <div id="input-container">
-    <input type="text" id="query" placeholder="Ask something..." onkeyup="if(event.keyCode === 13) sendMessage()" />
-    <button id="send-button" onclick="sendMessage()">Send</button>
-  </div>
+  <input type="text" id="query" placeholder="Ask something..." style="width:70%" />
+  <button onclick="sendMessage()">Send</button>
+  <div id="error" class="error" style="display:none;">Failed to connect to Dobby. Please try again later.</div>
 
   <script>
-    const queryInput = document.getElementById("query");
-    const chat = document.getElementById("chat");
-    const sendButton = document.getElementById("send-button");
+    console.log("Page loaded - initializing Dobby Assistant");
 
     async function sendMessage() {
-      const query = queryInput.value.trim();
+      const query = document.getElementById("query").value;
       if (!query) return;
 
-      // Disable button and input to prevent spam
-      sendButton.disabled = true;
-      queryInput.disabled = true;
-
-      // Display user message
+      const chat = document.getElementById("chat");
+      const errorDiv = document.getElementById("error");
       chat.innerHTML += `<div class="user"><b>You:</b> ${query}</div>`;
-      queryInput.value = "";
-      
-      // Add a thinking indicator for the bot
-      const thinkingDiv = document.createElement("div");
-      thinkingDiv.className = "bot";
-      thinkingDiv.innerHTML = "<b>Dobby:</b> Thinking...";
-      chat.appendChild(thinkingDiv);
-      chat.scrollTop = chat.scrollHeight;
+      document.getElementById("query").value = "";
+
+      const sendButton = document.querySelector("button");
+      sendButton.disabled = true;
+      sendButton.textContent = "Sending...";
 
       try {
+        console.log("Sending query to /api/research:", query);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
         const response = await fetch("/api/research", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query }),
+          signal: controller.signal,
         });
 
-        const data = await response.json();
-        
-        if (!response.ok) {
-            // If API returns an error, display it
-            throw new Error(data.error || "An unknown error occurred.");
-        }
-        
-        console.log("Response from Dobby:", data);
-        thinkingDiv.innerHTML = `<b>Dobby:</b> ${data.reply}`;
+        clearTimeout(timeoutId);
 
+        const rawText = await response.text();
+        console.log("Raw response from /api/research:", rawText.substring(0, 200) + "...");
+
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}: ${rawText.substring(0, 100)}...`);
+        }
+
+        let data;
+        try {
+          data = JSON.parse(rawText);
+        } catch (jsonError) {
+          throw new Error(`Invalid JSON response: ${rawText.substring(0, 100)}... (Full raw: ${rawText})`);
+        }
+
+        console.log("Parsed response from Dobby:", data);
+
+        if (data.error) {
+          chat.innerHTML += `<div class="bot error"><b>Dobby:</b> Error: ${data.error}</div>`;
+          errorDiv.style.display = "block";
+        } else {
+          chat.innerHTML += `<div class="bot"><b>Dobby:</b> ${data.reply || 'No reply received'}</div>`;
+          errorDiv.style.display = "none";
+        }
       } catch (err) {
-        console.error("Error fetching from /api/research:", err);
-        thinkingDiv.innerHTML = `<b class="error">Dobby:</b> Oops! ${err.message}</div>`;
+        console.error("Error in sendMessage:", err);
+        let errorMessage = "Failed to get response from Dobby.";
+        if (err.name === "AbortError") {
+          errorMessage = "Request timed out—try a shorter query.";
+        } else if (err.message.includes("HTTP error")) {
+          errorMessage = err.message;
+        } else if (err.message.includes("Invalid JSON")) {
+          errorMessage = `Invalid response from server: ${err.message}`;
+        }
+        chat.innerHTML += `<div class="bot error"><b>Error:</b> ${errorMessage}</div>`;
+        errorDiv.style.display = "block";
       } finally {
-        // Re-enable button and input
         sendButton.disabled = false;
-        queryInput.disabled = false;
-        queryInput.focus();
+        sendButton.textContent = "Send";
         chat.scrollTop = chat.scrollHeight;
       }
     }
+
+    window.addEventListener('load', () => {
+      console.log("DOM fully loaded");
+      document.getElementById("chat").innerHTML += `<div class="bot">Dobby Assistant initialized!</div>`;
+    });
   </script>
 </body>
 </html>
