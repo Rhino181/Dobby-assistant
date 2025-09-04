@@ -2,98 +2,20 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Dobby Assistant</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    #chat { border: 1px solid #ddd; padding: 10px; height: 400px; overflow-y: auto; margin-bottom: 10px; }
-    .user { color: blue; margin: 5px 0; }
-    .bot { color: green; margin: 5px 0; }
-    .error { color: red; margin: 5px 0; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dobby AI Assistant</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>⚡ Dobby AI Assistant</h1>
-  <div id="chat"></div>
-  <input type="text" id="query" placeholder="Ask something..." style="width:70%" />
-  <button onclick="sendMessage()">Send</button>
-  <div id="error" class="error" style="display:none;">Failed to connect to Dobby. Please try again later.</div>
-
-  <script>
-    console.log("Page loaded - initializing Dobby Assistant");
-
-    async function sendMessage() {
-      const query = document.getElementById("query").value;
-      if (!query) return;
-
-      const chat = document.getElementById("chat");
-      const errorDiv = document.getElementById("error");
-      chat.innerHTML += `<div class="user"><b>You:</b> ${query}</div>`;
-      document.getElementById("query").value = "";
-
-      const sendButton = document.querySelector("button");
-      sendButton.disabled = true;
-      sendButton.textContent = "Sending...";
-
-      try {
-        console.log("Sending query to /api/research:", query);
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-        const response = await fetch("/api/research", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query }),
-          signal: controller.signal,
-        });
-
-        clearTimeout(timeoutId);
-
-        const rawText = await response.text();
-        console.log("Raw response from /api/research:", rawText.substring(0, 200) + "...");
-
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}: ${rawText.substring(0, 100)}...`);
-        }
-
-        let data;
-        try {
-          data = JSON.parse(rawText);
-        } catch (jsonError) {
-          throw new Error(`Invalid JSON response: ${rawText.substring(0, 100)}... (Full raw: ${rawText})`);
-        }
-
-        console.log("Parsed response from Dobby:", data);
-
-        if (data.error) {
-          chat.innerHTML += `<div class="bot error"><b>Dobby:</b> Error: ${data.error}</div>`;
-          errorDiv.style.display = "block";
-        } else {
-          chat.innerHTML += `<div class="bot"><b>Dobby:</b> ${data.reply || 'No reply received'}</div>`;
-          errorDiv.style.display = "none";
-        }
-      } catch (err) {
-        console.error("Error in sendMessage:", err);
-        let errorMessage = "Failed to get response from Dobby.";
-        if (err.name === "AbortError") {
-          errorMessage = "Request timed out—try a shorter query.";
-        } else if (err.message.includes("HTTP error")) {
-          errorMessage = err.message;
-        } else if (err.message.includes("Invalid JSON")) {
-          errorMessage = `Invalid response from server: ${err.message}`;
-        }
-        chat.innerHTML += `<div class="bot error"><b>Error:</b> ${errorMessage}</div>`;
-        errorDiv.style.display = "block";
-      } finally {
-        sendButton.disabled = false;
-        sendButton.textContent = "Send";
-        chat.scrollTop = chat.scrollHeight;
-      }
-    }
-
-    window.addEventListener('load', () => {
-      console.log("DOM fully loaded");
-      document.getElementById("chat").innerHTML += `<div class="bot">Dobby Assistant initialized!</div>`;
-    });
-  </script>
+  <div class="container">
+    <h1>⚡ Dobby AI Assistant</h1>
+    <div class="chat-box" id="chat"></div>
+    <div class="input-area">
+      <input type="text" id="query" placeholder="Ask something..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+    <div id="error" class="error">Failed to connect to Dobby. Please try again later.</div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
