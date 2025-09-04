@@ -27,6 +27,16 @@ h1 {
   padding: 15px;
   text-align: center;
   font-size: 1.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.title-icon {
+  width: 40px; /* Adjust size as needed */
+  height: auto;
+  vertical-align: middle;
+  margin: 0 5px; /* Space between icon and text */
 }
 
 .chat-box {
