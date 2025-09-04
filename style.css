@@ -21,7 +21,7 @@ body {
   width: 100%;
   max-width: 800px;
   /* background: white; */ /* Comment out or remove to let background show through */
-  background: rgba(255, 255, 255, 0.7); /* Semi-transparent white to see background */
+  background: rgba(255, 255, 255, 0); /* Semi-transparent white to see background */
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
