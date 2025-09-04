@@ -6,7 +6,10 @@
 }
 
 body {
-  background-color: #f4f7fa;
+  background-image: url('sentient-bg.png'); /* Background image */
+  background-size: cover; /* Scales image to cover the entire background */
+  background-repeat: no-repeat; /* Prevents tiling */
+  background-position: center; /* Centers the image */
   display: flex;
   justify-content: center;
   padding: 20px;
@@ -33,10 +36,10 @@ h1 {
 }
 
 .title-icon {
-  width: 40px; /* Adjust size as needed */
+  width: 40px;
   height: auto;
   vertical-align: middle;
-  margin: 0 5px; /* Space between icon and text */
+  margin: 0 5px;
 }
 
 .chat-box {
