@@ -10,18 +10,22 @@ body {
   background-size: cover; /* Scales image to cover the entire background */
   background-repeat: no-repeat; /* Prevents tiling */
   background-position: center; /* Centers the image */
+  background-attachment: fixed; /* Keeps background fixed while scrolling */
+  min-height: 100vh; /* Ensures body takes full viewport height */
   display: flex;
   justify-content: center;
-  padding: 20px;
+  padding: 0; /* Remove padding to avoid gaps */
 }
 
 .container {
   width: 100%;
   max-width: 800px;
-  background: white;
+  /* background: white; */ /* Comment out or remove to let background show through */
+  background: rgba(255, 255, 255, 0.8); /* Optional: Use a semi-transparent white to see background faintly */
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  margin: 20px; /* Add margin instead of body padding for spacing */
 }
 
 h1 {
@@ -113,6 +117,7 @@ h1 {
 @media (max-width: 600px) {
   .container {
     width: 100%;
+    margin: 10px; /* Reduce margin on small screens */
   }
   .chat-box {
     height: 300px;
