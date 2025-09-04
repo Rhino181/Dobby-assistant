@@ -1,4 +1,4 @@
-* {
+** {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -82,8 +82,7 @@ h1 {
 .input-area {
   display: flex;
   padding: 15px;
-  /* background: white; */ /* Comment out or remove this line */
-  background: rgba(255, 255, 255, 0.7); /* Semi-transparent white to see background */
+  background: transparent; /* Explicitly set to transparent */
   border-top: 1px solid #ddd;
 }
 
@@ -94,6 +93,7 @@ h1 {
   border-radius: 5px 0 0 5px;
   outline: none;
   font-size: 1em;
+  background: rgba(255, 255, 255, 0.9); /* Ensure input text is readable */
 }
 
 .input-area button {
